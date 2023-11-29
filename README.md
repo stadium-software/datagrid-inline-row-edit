@@ -2,7 +2,7 @@
 
 Allowing users to conveniently and swiftly edit selected DataGrid rows
 
-https://github.com/stadium-software/datagrid-inline-edit/assets/2085324/63e775db-769e-4361-a242-6094a8d031f6
+https://github.com/stadium-software/datagrid-inline-row-edit/assets/2085324/88135464-9da0-4155-939b-bb9e31bf3931
 
 ## Sample applications
 This repo contains one Stadium 6.7 application
