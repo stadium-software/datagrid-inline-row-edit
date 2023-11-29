@@ -1,0 +1,22 @@
+:root {
+	--datagrid-inline-edit-text-field-size: auto;
+	--datagrid-inline-edit-dropdown-field-size: auto;
+	--datagrid-inline-edit-date-field-size: auto;
+	--datagrid-inline-edit-number-field-size: 80px; /*fits 5 numbers*/
+
+	--datagrid-inline-edit-active-row-background-color: rgba(51, 153, 255, .1);
+	--datagrid-inline-edit-active-row-border-top-color: rgba(51, 153, 255, 1);
+	--datagrid-inline-edit-active-row-border-right-color: rgba(51, 153, 255, 1);
+	--datagrid-inline-edit-active-row-border-bottom-color: rgba(51, 153, 255, 1);
+	--datagrid-inline-edit-active-row-border-left-color: rgba(51, 153, 255, 1);
+
+	--row-inline-edit-disabled-rows-opacity: .6;
+	--row-inline-edit-row-background-color: rgba(25,118,210, .3);
+	
+	--row-inline-edit-button-background-color: #1976D2;
+	--row-inline-edit-button-border-color: #1976d2;
+	--row-inline-edit-button-font-size: 14px;
+	--row-inline-edit-button-font-color: #ffffff;
+	--row-inline-edit-button-topbottom-padding: 6px;
+	--row-inline-edit-button-rightleft-padding: 6px;
+}

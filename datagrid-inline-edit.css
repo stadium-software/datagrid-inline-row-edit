@@ -1,0 +1,80 @@
+.datagrid-inline-edit-form {
+	& .visually-hidden {
+		height: 0;
+		width: 0;
+		overflow: hidden;
+		outline: 0;
+		border: 0;
+		position: absolute;
+		padding: 0;
+	}
+	& .edit-button-bar {
+		display: flex;
+		flex-direction: row;
+		gap: 6px;
+		align-items: center;
+	}
+	& table .form-control {
+		width: var(--datagrid-inline-edit-text-field-size);
+	}
+	& table select.form-control {
+		width: var(--datagrid-inline-edit-dropdown-field-size);
+	}
+	& table input[type="date"].form-control {
+		width: var(--datagrid-inline-edit-date-field-size);
+	}
+	& table input[type="number"].form-control {
+		width: var(--datagrid-inline-edit-number-field-size);
+	}
+	& .table-striped > tbody > tr.editing:nth-of-type(odd),
+	& .table-striped>tbody>tr.editing:nth-of-type(even) {
+		background-color: var(--datagrid-inline-edit-active-row-background-color);
+		& td {
+			border-top: 1px solid var(--datagrid-inline-edit-active-row-border-top-color);
+			border-bottom: 1px solid var(--datagrid-inline-edit-active-row-border-bottom-color);
+		}
+		& .last-visible-column {
+			border-right: 1px solid var(--datagrid-inline-edit-active-row-border-right-color);
+		}
+		& td:first-child {
+			border-left: 1px solid var(--datagrid-inline-edit-active-row-border-left-color);
+		}
+	}
+	& .inline-edit-hide {
+		display: none;
+	}
+	& .stadium-form-save {
+		font-size: var(--row-inline-edit-button-font-size);
+		background-color: var(--row-inline-edit-button-background-color);
+		border: 1px solid var(--row-inline-edit-button-border-color);
+		padding: var(--row-inline-edit-button-topbottom-padding) var(--row-inline-edit-button-rightleft-padding);
+		color: var(--row-inline-edit-button-font-color);
+	}
+	& .opacity {
+		opacity: var(--row-inline-edit-disabled-rows-opacity);
+	}
+	& .data-grid-container .table-striped>tbody>tr.edit-form {
+		background-color: var(--row-inline-edit-row-background-color);
+	}
+	& .data-grid-container .table-striped.edit-orig-table {
+		display: none;
+	}
+	& .edit-orig {
+		height: 0;
+		width: 0;
+		overflow: hidden;
+		outline: 0;
+		border: 0;
+		position: absolute;
+		padding: 0;
+	}
+}
+button.btn.visually-hidden {
+	height: 0;
+	width: 0;
+	overflow: hidden;
+	outline: 0;
+	border: 0;
+	position: absolute;
+	padding: 0;
+}
