@@ -16,12 +16,11 @@ This repo contains one Stadium 6.7 application
   - [Application Setup](#application-setup)
   - [Database, Connector and DataGrid](#database-connector-and-datagrid)
   - [Type Setup](#type-setup)
-- [Row Editing](#row-editing)
-  - [Row Editing Global Script Setup](#row-editing-global-script-setup)
-  - [Row Editing Page-Script Setup](#row-editing-page-script-setup)
-  - [Row Editing Page Setup](#row-editing-page-setup)
-  - [Row Editing Page.Load Event Setup](#row-editing-pageload-event-setup)
-  - [Row Editing Edit.Click Event Setup](#row-editing-editclick-event-setup)
+  - [Global Script Setup](#global-script-setup)
+  - [Page-Script Setup](#page-script-setup)
+  - [Page Setup](#page-setup)
+  - [Page.Load Event Setup](#pageload-event-setup)
+  - [Edit.Click Event Setup](#editclick-event-setup)
 - [Styling](#styling)
   - [Applying the CSS](#applying-the-css)
   - [Customising CSS](#customising-css)
@@ -47,6 +46,7 @@ This repo contains one Stadium 6.7 application
 
 ## Database, Connector and DataGrid
 1. Use the instructions from [this repo](https://github.com/stadium-software/samples-database) to setup the database and DataGrid for this sample
+2. The DataGrid must contain an Edit column and the Edit column must have a click event handler
 
 ## Type Setup
 1. Create a *Type* called "FormField"
@@ -61,10 +61,7 @@ This repo contains one Stadium 6.7 application
 
 ![Form Fields](images/FormFieldType.png)
 
-# Row Editing
-For this module to work, the DataGrid must contain an Edit column and the Edit column must have a click event handler
-
-## Row Editing Global Script Setup
+## Global Script Setup
 1. Create a Global Script called "EditableRow"
 2. Add five input parameters to the Global Script
    1. DataGridClass
@@ -308,22 +305,25 @@ function insertAfter(newNode, existingNode) {
 }
 ```
 
-## Row Editing Page-Script Setup
+## Page-Script Setup
 1. Create a Script inside of the Page with any name you like (e.g. "SaveRow")
 2. Add one input parameter to the Script
    1. RowData
 3. Drag a *Notification* action into the script
 4. In the *Message* property, select the *RowData* parameter from the *Script Input Parameters* category
 
-## Row Editing Page Setup
+## Page Setup
 1. Drag a *DataGrid* control to the page ([see above](#database-connector-and-datagrid))
 2. Add a class of your choosing to the *DataGrid* *Classes* property ti uniquely identify this DataGrid on this page (e.g datagrid-inline-edit)
 3. Note: If multiple editable DataGrids are shown on one page, each DataGrid must have a unique classname
 
-## Row Editing Page.Load Event Setup
+## Page.Load Event Setup
 1. Populate the DataGrid with data ([see above](#database-connector-and-datagrid))
 
-## Row Editing Edit.Click Event Setup
+## Edit.Click Event Setup
+
+DataGrid must contain an Edit column (a clickable row-level coilumn) and that column must have a click event handler
+
 1. Drag a *List* action into the event script and name the List "FormFields"
 2. Set the List *Item Type* property to "Types.FormField"
 3. Define the editable columns of your datagrid and their form fields
