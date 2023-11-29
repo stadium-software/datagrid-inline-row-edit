@@ -13,6 +13,7 @@ This repo contains one Stadium 6.7 application
   - [Sample applications](#sample-applications)
 - [Content](#content)
   - [Version](#version)
+- [Setup](#setup)
   - [Application Setup](#application-setup)
   - [Database, Connector and DataGrid](#database-connector-and-datagrid)
   - [Type Setup](#type-setup)
@@ -40,6 +41,8 @@ This repo contains one Stadium 6.7 application
 1.3 Added custom event handler feature
 
 1.4 Fixed Selectable column bug
+
+# Setup
 
 ## Application Setup
 1. Check the *Enable Style Sheet* checkbox in the application properties
