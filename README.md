@@ -12,7 +12,7 @@ This repo contains one Stadium 6.7 application
 - [Datagrid Inline Row Editing](#datagrid-inline-row-editing)
   - [Sample applications](#sample-applications)
 - [Content](#content)
-- [Version](#version)
+  - [Version](#version)
   - [Application Setup](#application-setup)
   - [Database, Connector and DataGrid](#database-connector-and-datagrid)
   - [Type Setup](#type-setup)
@@ -26,7 +26,7 @@ This repo contains one Stadium 6.7 application
   - [Customising CSS](#customising-css)
   - [CSS Upgrading](#css-upgrading)
 
-# Version 
+## Version 
 1.4
 
 1.1 Row Editing
