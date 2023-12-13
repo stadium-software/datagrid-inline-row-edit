@@ -79,7 +79,6 @@ This repo contains one Stadium 6.7 application
 /*Stadium Script Version 1.4*/
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
-console.log(callback);
 let dgClassName = "." + ~.Parameters.Input.DataGridClass;
 let dg = document.querySelectorAll(dgClassName);
 if (dg.length == 0) {
@@ -249,7 +248,7 @@ function enrichRowData(data) {
     });
     for (let i = 0; i < arrHeadings.length; i++) {
         let heading = arrHeadings[i].innerText.toLowerCase().replaceAll(" ", "");
-        let index = getIndex(data, heading); //data.findIndex((col) => col.name == heading);
+        let index = getIndex(data, heading);
         if (index > -1) {
             data[index].colNo = i + 1;
         } else if (IDColumn.toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
@@ -286,7 +285,6 @@ async function saveButtonClick(e) {
         let field = { Name: formFields[i].getAttribute("stadium-form-name"), Value: fieldValue};
         arrData.push(field);
     }
-    console.log(callback);
     await scope[callback](arrData);
     resetDataGrid();
 }
