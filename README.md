@@ -74,7 +74,7 @@ This repo contains one Stadium 6.7 application
    5. IdentityValue
    6. CallbackScript
 3. Drag a *JavaScript* action into the script
-4. Add the Javascript below into the JavaScript code property (ignore the validation error message "Invalid script was detected")
+4. Add the Javascript below into the JavaScript code property
 ```javascript
 /*Stadium Script Version 1.4*/
 let scope = this;
@@ -105,6 +105,9 @@ let options = {
     characterDataOldValue: true,
 },
 observer = new MutationObserver(resetDataGrid);
+let getIndex = (heystack, needle) => {
+    return heystack.findIndex((col) => col.name == needle);
+};
 
 insertForm();
 initForm();
@@ -246,7 +249,7 @@ function enrichRowData(data) {
     });
     for (let i = 0; i < arrHeadings.length; i++) {
         let heading = arrHeadings[i].innerText.toLowerCase().replaceAll(" ", "");
-        let index = data.findIndex((col) => col.name == heading);
+        let index = getIndex(data, heading); //data.findIndex((col) => col.name == heading);
         if (index > -1) {
             data[index].colNo = i + 1;
         } else if (IDColumn.toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
