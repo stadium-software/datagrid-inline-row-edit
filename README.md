@@ -42,6 +42,8 @@ This repo contains one Stadium 6.7 application
 
 1.4 Fixed Selectable column bug
 
+1.5 Enabled adding IDColumn and EditColumn as column numbers
+
 # Setup
 
 ## Application Setup
@@ -76,7 +78,7 @@ This repo contains one Stadium 6.7 application
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/*Stadium Script Version 1.4*/
+/*Stadium Script Version 1.5*/
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
 let dgClassName = "." + ~.Parameters.Input.DataGridClass;
@@ -105,7 +107,11 @@ let options = {
 },
 observer = new MutationObserver(resetDataGrid);
 let getIndex = (heystack, needle) => {
-    return heystack.findIndex((col) => col.name == needle);
+    let result = needle - 1;
+    if (isNaN(parseFloat(needle))) { 
+        result = heystack.findIndex((col) => col.name == needle);
+    }
+    return result;
 };
 
 insertForm();
@@ -251,10 +257,14 @@ function enrichRowData(data) {
         let index = getIndex(data, heading);
         if (index > -1) {
             data[index].colNo = i + 1;
-        } else if (IDColumn.toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
+        } else if (IDColumn.toString().toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
             data.push({ name: IDColumn, colNo: i + 1, type: "Identity" });
-        } else if (EditColumn.toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
+        } else if (EditColumn.toString().toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
             data.push({ name: EditColumn, colNo: i + 1, type: "EditLink" });
+        } else if (IDColumn == (i + 1)) {
+            data.push({ name: "Identity", colNo: IDColumn, type: "Identity" });
+        } else if (EditColumn == (i + 1)) {
+            data.push({ name: "", colNo: EditColumn, type: "EditLink" });
         } else { 
             data.push({colNo: i + 1, name: heading});
         }
@@ -387,9 +397,9 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
 4. Drag the Global Script called "EditableRow" into the event script
 5. Complete the Input properties for the script
    1. DataGridClass: The unique classname you assigned to the *DataGrid*
-   2. EditColumnHeader: The header of the Edit column
+   2. EditColumnHeader: The header of the Edit column OR the column number (e.g. 1)
    3. FormFields: Select the *List* called "FormFields" from the dropdown
-   4. IdentityColumnHeader: The header of the column that uniquely identifies each row (e.g. ID)
+   4. IdentityColumnHeader: The header of the column that uniquely identifies each row (e.g. ID) OR the column number (e.g. 2)
    5. IdentityValue: The value from the IdentityColumn that uniquely identifies the row
    6. CallbackScript: The name of the page-level script that will process the updated data (e.g. SaveRow)
 
