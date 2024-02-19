@@ -78,7 +78,7 @@ This repo contains one Stadium 6.7 application
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/*Stadium Script Version 1.5*/
+/* Stadium Script Version 1.5 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
 let dgClassName = "." + ~.Parameters.Input.DataGridClass;
