@@ -28,7 +28,7 @@ This repo contains one Stadium 6.7 application
   - [CSS Upgrading](#css-upgrading)
 
 ## Version 
-1.4
+Current version 1.6
 
 1.1 Row Editing
 
