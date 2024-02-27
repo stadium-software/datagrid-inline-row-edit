@@ -44,6 +44,8 @@ This repo contains one Stadium 6.7 application
 
 1.5 Enabled adding IDColumn and EditColumn as column numbers
 
+1.6 Fixed row not found error
+
 # Setup
 
 ## Application Setup
@@ -78,7 +80,7 @@ This repo contains one Stadium 6.7 application
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/* Stadium Script Version 1.5 https://github.com/stadium-software/datagrid-inline-row-edit */
+/* Stadium Script Version 1.6 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
 let dgClassName = "." + ~.Parameters.Input.DataGridClass;
@@ -146,12 +148,17 @@ function initForm() {
     let IDCells = table.querySelectorAll("tbody tr td:nth-child(" + IDColNo + ")");
     for (let i = 0; i < IDCells.length; i++) {
         let rowtr = IDCells[i].parentElement;
-        if (IDCells[i].innerText == IDValue) {
+        let IDCell = IDCells[i].innerText.replaceAll(" ", "");
+        if (IDCell == IDValue) {
             rowNumber = i + 1;
         } else { 
             rowtr.classList.add("opacity");
             rowtr.addEventListener("click", resetDataGrid);
         }
+    }
+    if (!rowNumber) {
+        console.error("The row was not found");
+        return false;
     }
 
     let row = table.querySelector("tbody tr:nth-child(" + rowNumber + ")");
