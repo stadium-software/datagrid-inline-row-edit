@@ -412,10 +412,8 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
 
 ![Inline Editing Input Parameters](images/InlineRowEditingInputParameters.png)
 
-# Styling
-Various elements in this module can be styled using the two CSS files in this repo
-
 ## Applying the CSS
+The CSS below is required for the correct functioning of the module. Some elements can be [customised](#customising-css) using a variables CSS file. 
 
 **Stadium 6.6 or higher**
 1. Create a folder called "CSS" inside of your Embedded Files in your application
