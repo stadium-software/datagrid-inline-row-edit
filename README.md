@@ -22,13 +22,12 @@ This repo contains one Stadium 6.7 application
   - [Page Setup](#page-setup)
   - [Page.Load Event Setup](#pageload-event-setup)
   - [Edit.Click Event Setup](#editclick-event-setup)
-- [Styling](#styling)
   - [Applying the CSS](#applying-the-css)
   - [Customising CSS](#customising-css)
   - [CSS Upgrading](#css-upgrading)
 
 ## Version 
-Current version 1.6
+Current version 2.0 - changes are required!
 
 1.1 Row Editing
 
@@ -46,6 +45,17 @@ Current version 1.6
 
 1.6 Fixed row not found error
 
+2.0 Added checkbox column support; changed header-based column definition to column count instead; added text and value definition for dropdowns. Required changes
+1. FormField Type: change "name" property to "column"
+2. Script
+   1. Update to version below
+   2. Change input parameter name "EditColumnHeader" to "LinkColumn"
+   3. Change input parameter name "IdentityColumnHeader" to "IdentityColumn"
+3. Edit.Click Event Setup
+   1. Change FormFields list inputs for "column" (previously "name") from strings to integers
+   2. Change FormFields list inputs for "dropdown" from list of strings to list of objects (see [example below](#editclick-event-setup))
+   3. Amend values for script input parameters IDColumn & LinkColumn from strings to integers
+
 # Setup
 
 ## Application Setup
@@ -58,7 +68,7 @@ Current version 1.6
 ## Type Setup
 1. Create a *Type* called "FormField"
 2. Add the following properties to the type
-   1. "name" (Any)
+   1. "column" (Any)
    2. "type" (Any)
    3. "required" (Any)
    4. "min" (Any)
@@ -72,15 +82,15 @@ Current version 1.6
 1. Create a Global Script called "EditableRow"
 2. Add five input parameters to the Global Script
    1. DataGridClass
-   2. EditColumnHeader
+   2. LinkColumn
    3. FormFields
-   4. IdentityColumnHeader
+   4. IdentityColumn
    5. IdentityValue
    6. CallbackScript
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/* Stadium Script Version 1.6 https://github.com/stadium-software/datagrid-inline-row-edit */
+/* Stadium Script Version 2.0 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
 let dgClassName = "." + ~.Parameters.Input.DataGridClass;
@@ -96,31 +106,21 @@ if (dg.length == 0) {
 dg.classList.add("stadium-inline-edit-datagrid");
 let table = dg.querySelector("table");
 let rowFormFields = ~.Parameters.Input.FormFields;
-let IDColumn = ~.Parameters.Input.IdentityColumnHeader;
+let IDColumn = ~.Parameters.Input.IdentityColumn;
 let IDValue = ~.Parameters.Input.IdentityValue;
-let EditColumn = ~.Parameters.Input.EditColumnHeader;
-let IDColNo, rowNumber;
+let EditLink = ~.Parameters.Input.LinkColumn;
+let rowNumber;
 let options = {
-    characterData: true,
-    attributes: false,
     childList: true,
     subtree: true,
-    characterDataOldValue: true,
 },
 observer = new MutationObserver(resetDataGrid);
-let getIndex = (heystack, needle) => {
-    let result = needle - 1;
-    if (isNaN(parseFloat(needle))) { 
-        result = heystack.findIndex((col) => col.name == needle);
-    }
-    return result;
-};
 
 insertForm();
 initForm();
 document.onkeydown = function (evt) {
     evt = evt || window.event;
-    var isEscape = false;
+    let isEscape = false;
     if ("key" in evt) {
         isEscape = (evt.key === "Escape" || evt.key === "Esc");
     } else {
@@ -135,22 +135,12 @@ observer.observe(dg, options);
 /*--------------------------------------------------------------------------------------*/
 
 function initForm() { 
-    let enrichedRowData = enrichRowData(rowFormFields);
-    let result = enrichedRowData.find((obj) => {
-        return obj.type == "Identity";
-    });
-    if (!result) {
-        console.error("The identity column was not found");
-        return false;
-    }
-    IDColNo = result.colNo;
-
-    let IDCells = table.querySelectorAll("tbody tr td:nth-child(" + IDColNo + ")");
+    let IDCells = table.querySelectorAll("tbody tr td:nth-child(" + IDColumn + ")");
     for (let i = 0; i < IDCells.length; i++) {
         let rowtr = IDCells[i].parentElement;
         let IDCell = IDCells[i].innerText.replaceAll(" ", "");
         if (IDCell == IDValue) {
-            rowNumber = i + 1;
+            rowNumber = i+1;
         } else { 
             rowtr.classList.add("opacity");
             rowtr.addEventListener("click", resetDataGrid);
@@ -160,24 +150,47 @@ function initForm() {
         console.error("The row was not found");
         return false;
     }
-
     let row = table.querySelector("tbody tr:nth-child(" + rowNumber + ")");
     row.classList.add("edit-orig");
+    let cells = row.querySelectorAll("td");
     let editform = document.createElement("tr");
     editform.classList.add("edit-form");
-    for (let i = 0; i < enrichedRowData.length; i++) {
-        let origCell = row.querySelectorAll("td")[i];
+    for (let i = 0; i < cells.length; i++) {
+        let colNum = i+1, el, ffield = getElement(rowFormFields, colNum, "column"), name, type, data, min, max, required;
+        let header = table.querySelector("thead th:nth-child(" + colNum + ")");
+        if (header) {
+            name = header.textContent;
+        } else {
+            name = "";
+        }
+        if (ffield) {
+            type = ffield.type;
+            data = ffield.data;
+            min = ffield.min;
+            max = ffield.max;
+            required = ffield.required;
+        }
+        let origCell = row.querySelector("td:nth-child(" + colNum + ")");
         let origStyles = origCell.getAttribute("style");
         let cell = document.createElement("td");
         cell.setAttribute("style", origStyles);
-        let name = enrichedRowData[i].name;
         let value = origCell.textContent;
-        let type = enrichedRowData[i].type;
-        let data = enrichedRowData[i].data;
-        let min = enrichedRowData[i].min;
-        let max = enrichedRowData[i].max;
-        let required = enrichedRowData[i].required;
-        let el;
+        if (type == "text") {
+            el = document.createElement("input");
+            el.value = value;
+            el.setAttribute("stadium-form-name", name);
+            el.classList.add("form-control");
+        }
+        if (type == "number") {
+            el = document.createElement("input");
+            el.setAttribute("type", "number");
+            if (min) el.setAttribute("min", min);
+            if (max) el.setAttribute("max", max);
+            el.setAttribute("onkeydown", "return event.keyCode !== 69");
+            el.value = value;
+            el.setAttribute("stadium-form-name", name);
+            el.classList.add("form-control");
+        }
         if (type == "date") {
             el = document.createElement("input");
             el.setAttribute("type", "date");
@@ -195,51 +208,39 @@ function initForm() {
             el.setAttribute("stadium-form-name", name);
             let d = new Date(value);
             el.value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-        } else if (type == "number") {
-            el = document.createElement("input");
-            el.setAttribute("type", "number");
-            if (min) el.setAttribute("min", min);
-            if (max) el.setAttribute("max", max);
-            el.setAttribute("onkeydown", "return event.keyCode !== 69");
-            el.value = value;
-            el.setAttribute("stadium-form-name", name);
-            el.classList.add("form-control");
-        } else if (type == "checkbox") {
+        }
+        if (type == "checkbox") {
             el = document.createElement("input");
             el.setAttribute("stadium-form-name", name);
             el.setAttribute("type", "checkbox");
             if (value == "true" || value == "Yes" || value == "1") {
                 el.setAttribute("checked", "");
             }
-        } else if (type == "dropdown") {
+        }
+        if (type == "dropdown") {
             el = document.createElement("select");
             for (let j = 0; j < data.length; j++) {
                 let option = document.createElement("option");
-                option.text = data[j];
-                option.value = data[j];
+                option.text = data[j].text;
+                option.value = data[j].value;
                 el.appendChild(option);
             }
             el.value = value;
             el.setAttribute("stadium-form-name", name);
             el.classList.add("form-control");
-        } else if (type == "EditLink") {
+        }
+        if (!type && origCell.querySelector(":not(button, a, [type='checkbox'])")) { 
+            cell.textContent = value;
+            el = document.createElement("input");
+            el.value = value;
+            el.setAttribute("stadium-form-name", name);
+            el.setAttribute("type", "hidden");
+        }
+        if (colNum == EditLink) {
             el = document.createElement("button");
             el.classList.add("stadium-form-save");
             el.setAttribute("type", "submit");
             el.innerText = "Save";
-        } else if (type == "text") {
-            el = document.createElement("input");
-            el.value = value;
-            el.setAttribute("stadium-form-name", name);
-            el.classList.add("form-control");
-        } else { 
-            if (!origCell.querySelector("button")) { 
-                cell.textContent = value;
-                el = document.createElement("input");
-                el.value = value;
-                el.setAttribute("stadium-form-name", name);
-                el.setAttribute("type", "hidden");
-            }
         }
         if (el) {
             el.classList.add("stadium-inline-form-control");
@@ -249,35 +250,6 @@ function initForm() {
         editform.appendChild(cell);
     }
     insertAfter(editform, row);
-}
-function enrichRowData(data) {
-    let arrHeadings = table.querySelectorAll("thead th");
-    data.forEach((element, index) => {
-        if (element.name) {
-            data[index].name = element.name.toLowerCase().replaceAll(" ", "");
-        } else { 
-            element.name = "";
-        }
-    });
-    for (let i = 0; i < arrHeadings.length; i++) {
-        let heading = arrHeadings[i].innerText.toLowerCase().replaceAll(" ", "");
-        let index = getIndex(data, heading);
-        if (index > -1) {
-            data[index].colNo = i + 1;
-        } else if (IDColumn.toString().toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
-            data.push({ name: IDColumn, colNo: i + 1, type: "Identity" });
-        } else if (EditColumn.toString().toLowerCase() == arrHeadings[i].innerText.toLowerCase()) {
-            data.push({ name: EditColumn, colNo: i + 1, type: "EditLink" });
-        } else if (IDColumn == (i + 1)) {
-            data.push({ name: "Identity", colNo: IDColumn, type: "Identity" });
-        } else if (EditColumn == (i + 1)) {
-            data.push({ name: "", colNo: EditColumn, type: "EditLink" });
-        } else { 
-            data.push({colNo: i + 1, name: heading});
-        }
-    }
-    data.sort((a, b) => a.colNo - b.colNo);
-    return data;
 }
 function resetDataGrid(){ 
     observer.disconnect();
@@ -324,6 +296,9 @@ function insertForm() {
 function insertAfter(newNode, existingNode) {
     existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
+function getElement(haystack, needle, column) {
+    return haystack.find(obj => {return obj[column] == needle;});
+}
 ```
 
 ## Page-Script Setup
@@ -348,7 +323,7 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
 1. Drag a *List* action into the event script and name the List "FormFields"
 2. Set the List *Item Type* property to "Types.FormField"
 3. Define the editable columns of your datagrid and their form fields
-   1. name: The heading of the column
+   1. column: The column number (start counting at 1; include all datagrid columns)
    2. type: The type of the column. Supported are
       1. text
       2. date
@@ -362,51 +337,51 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
    6. data: A simple list of values for dropdowns (see example below)
 ```json
 = [{
-	"name": "End Date",
-	"type": "date",
-	"required": "true"
+ "column":3,
+ "type": "text"
 },{
-	"name": "First Name",
-	"type": "text"
+ "column": 4,
+ "type": "text"
 },{
-	"name": "Last Name",
-	"type": "text"
+ "column": 5,
+ "type": "number",
+ "min": "0",
+ "max": "10",
+ "required": "true"
 },{
-	"name": "No of Children",
-	"type": "number",
-	"min": "0",
-	"max": "10",
-	"required": "true"
+ "column": 6,
+ "type": "number",
+ "min": "0",
+ "max": "10",
+ "required": "true"
 },{
-	"name": "No of Pets",
-	"type": "number",
-	"min": "0",
-	"max": "10",
-	"required": "true"
+ "column": 7,
+ "type": "date",
+ "min": "01-01-2010",
+ "max": "01-01-2024"
 },{
-	"name": "Start Date",
-	"type": "date",
-	"min": "01-01-2010",
-	"max": "01-01-2024"
+ "column": 8,
+ "type": "date",
+ "required": "true"
 },{
-	"name": "Healthy",
-	"type": "checkbox"
+ "column": 9,
+ "type": "checkbox"
 },{
-	"name": "Happy",
-	"type": "checkbox"
+ "column": 10,
+ "type": "checkbox"
 },{
-	"name": "Subscription",
-	"type": "dropdown",
-	"data": ["", "Subscribed", "Unsubscribed", "No data"],
-	"required": "true"
+ "column": 11,
+ "type": "dropdown",
+ "data": [{"text":"","value":""}, {"text":"Subscribed","value":"1"}, {"text":"Unsubscribed","value":"2"}, {"text":"No data","value":"3"}],
+ "required": "true"
 }]
 ```
 4. Drag the Global Script called "EditableRow" into the event script
 5. Complete the Input properties for the script
    1. DataGridClass: The unique classname you assigned to the *DataGrid*
-   2. EditColumnHeader: The header of the Edit column OR the column number (e.g. 1)
+   2. LinkColumn: The column number (e.g. 1)
    3. FormFields: Select the *List* called "FormFields" from the dropdown
-   4. IdentityColumnHeader: The header of the column that uniquely identifies each row (e.g. ID) OR the column number (e.g. 2)
+   4. IdentityColumn: The column number  (e.g. 2)
    5. IdentityValue: The value from the IdentityColumn that uniquely identifies the row
    6. CallbackScript: The name of the page-level script that will process the updated data (e.g. SaveRow)
 
