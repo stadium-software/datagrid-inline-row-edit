@@ -46,7 +46,7 @@ Current version 2.0 - changes are required!
    1. Update to version below
    2. Change input parameter name "EditColumnHeader" to "LinkColumn"
    3. Change input parameter name "IdentityColumnHeader" to "IdentityColumn"
-3. Event handler (see [Edit.Click Event Script](#edit-event-script))
+3. Event handler (see [Edit.Click Event Script](#editclick-event-setup))
    1. Change FormFields list inputs for "column" (previously "name") from strings to integers
    2. Change FormFields list inputs for "dropdown" from list of strings to list of objects (see [example below](#editclick-event-setup))
    3. Amend values for script input parameters IDColumn & LinkColumn from strings to integers
