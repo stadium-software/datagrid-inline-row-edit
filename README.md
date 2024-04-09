@@ -384,7 +384,7 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
    5. IdentityValue: The value from the IdentityColumn that uniquely identifies the row
    6. CallbackScript: The name of the page-level script that will process the updated data (e.g. SaveRow)
 
-**NOTE: Be sure to refresh the DataGrid data after saving updates to facilitate the correct functioning of the DataGrid search and sort functionality**
+**NOTE: Be sure to refresh the DataGrid data after saving updates to ensure the correct functioning of the DataGrid search and sort functionality**
 
 ![Inline Editing Input Parameters](images/InlineRowEditingInputParameters.png)
 
