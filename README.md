@@ -51,6 +51,8 @@ Current version 2.0 - changes are required!
    2. Change FormFields list inputs for "dropdown" from list of strings to list of objects (see [example below](#editclick-event-setup))
    3. Amend values for script input parameters IDColumn & LinkColumn from strings to integers
 
+2.1 Added support for DataGrid searching and sorting
+
 # Setup
 
 ## Application Setup
@@ -85,9 +87,10 @@ Current version 2.0 - changes are required!
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/* Stadium Script Version 2.0 https://github.com/stadium-software/datagrid-inline-row-edit */
+/* Stadium Script Version 2.1 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
+let pageName = window.location.pathname.replace("/", "");
 let dgClassName = "." + ~.Parameters.Input.DataGridClass;
 let dg = document.querySelectorAll(dgClassName);
 if (dg.length == 0) {
@@ -99,7 +102,9 @@ if (dg.length == 0) {
     dg = dg[0];
 }
 dg.classList.add("stadium-inline-edit-datagrid");
+let datagridname = dg.id.replace(`${pageName}_`, "").replace("-container","");
 let table = dg.querySelector("table");
+let dataGridColumns = getColumnDefinition();
 let rowFormFields = ~.Parameters.Input.FormFields;
 let IDColumn = ~.Parameters.Input.IdentityColumn;
 let IDValue = ~.Parameters.Input.IdentityValue;
@@ -150,6 +155,7 @@ function initForm() {
     let cells = row.querySelectorAll("td");
     let editform = document.createElement("tr");
     editform.classList.add("edit-form");
+    editform.setAttribute("data-id",IDValue);
     for (let i = 0; i < cells.length; i++) {
         let colNum = i+1, el, ffield = getElement(rowFormFields, colNum, "column"), name, type, data, min, max, required;
         let header = table.querySelector("thead th:nth-child(" + colNum + ")");
@@ -218,9 +224,11 @@ function initForm() {
                 let option = document.createElement("option");
                 option.text = data[j].text;
                 option.value = data[j].value;
+                if (data[j].text == value) {
+                    option.selected = true;
+                }
                 el.appendChild(option);
             }
-            el.value = value;
             el.setAttribute("stadium-form-name", name);
             el.classList.add("form-control");
         }
@@ -260,15 +268,27 @@ function resetDataGrid(){
 }
 async function saveButtonClick(e) { 
     e.preventDefault();
-    let form = e.target.closest("form");
-    let formFields = form.querySelectorAll("[stadium-form-name]");
+    let row = table.querySelector(".edit-form");
+    let IDVal = row.getAttribute("data-id");
+    let cells = row.cells;
     let arrData = [];
-    for (let i = 0; i < formFields.length; i++) { 
-        let fieldValue = formFields[i].value;
-        if (formFields[i].getAttribute("type") == "checkbox") fieldValue = formFields[i].checked;
-        let field = { Name: formFields[i].getAttribute("stadium-form-name"), Value: fieldValue};
-        arrData.push(field);
+    let field, objData = {};
+    for (let i = 0; i < cells.length; i++) {
+        let formField = cells[i].querySelector("[stadium-form-name]:not([stadium-form-name='']");
+        if (formField) {
+            let fieldValue = formField.value;
+            if (formField.getAttribute("type") == "checkbox") fieldValue = formField.checked;
+            field = { Name: dataGridColumns[i], Value: fieldValue};
+            arrData.push(field);
+            if (formField.tagName == "SELECT") fieldValue = formField.options[formField.selectedIndex].text;
+            objData[dataGridColumns[i]] = fieldValue;
+        } else if (IDColumn-1 == i){
+            field = { Name: dataGridColumns[i], Value: IDVal};
+            arrData.push(field);
+            objData[dataGridColumns[i]] = IDVal;
+        }
     }
+    updateDataModelRow(IDVal, objData);
     await scope[callback](arrData);
     resetDataGrid();
 }
@@ -293,6 +313,21 @@ function insertAfter(newNode, existingNode) {
 }
 function getElement(haystack, needle, column) {
     return haystack.find(obj => {return obj[column] == needle;});
+}
+function updateDataModelRow(id, rowData){
+    let handler1 = {};
+    let dgData = scope[`${datagridname}Data`];
+    let result = dgData.map(el => el[dataGridColumns[IDColumn-1]] == id ? new Proxy(rowData, handler1) : el);
+    scope[`${datagridname}Data`] = result;
+}
+function getColumnDefinition(){
+    let cols = [];
+    let colDefs = scope[`${datagridname}ColumnDefinitions`];
+    if (table.querySelector("thead th:nth-child(1) input[type=checkbox")) cols.push("RowSelector");
+    for (let i = 0; i < colDefs.length; i++) {
+        cols.push(colDefs[i].name);
+    }
+    return cols;
 }
 ```
 
@@ -379,8 +414,6 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
    4. IdentityColumn: The column number  (e.g. 2)
    5. IdentityValue: The value from the IdentityColumn that uniquely identifies the row
    6. CallbackScript: The name of the page-level script that will process the updated data (e.g. SaveRow)
-
-**NOTE: To ensure the correct functioning of the DataGrid search and sort functionality, be sure to refresh the DataGrid data after saving updates**
 
 ![Inline Editing Input Parameters](images/InlineRowEditingInputParameters.png)
 
