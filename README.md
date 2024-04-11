@@ -108,12 +108,13 @@ let rowFormFields = ~.Parameters.Input.FormFields;
 let IDColumn = ~.Parameters.Input.IdentityColumn;
 let IDValue = ~.Parameters.Input.IdentityValue;
 let EditLink = ~.Parameters.Input.LinkColumn;
-if (isNaN(parseFloat(IDColumn))) {
+if (!isNumber(IDColumn)) {
     IDColumn = getElementIndex(dataGridColumns, IDColumn) + 1;
 }
-if (isNaN(parseFloat(EditLink))) {
+if (!isNumber(EditLink)) {
     EditLink = getElementIndex(dataGridColumns, EditLink) + 1;
 }
+let idColumnName = dataGridColumns[IDColumn - 1];
 let rowNumber;
 let options = {
     childList: true,
@@ -161,6 +162,7 @@ function initForm() {
     let editform = document.createElement("tr");
     editform.classList.add("edit-form");
     editform.setAttribute("data-id",IDValue);
+    let rowData = getElementFromObjects(scope[`${datagridname}Data`], IDValue, idColumnName);
     for (let i = 0; i < cells.length; i++) {
         let el, type, data, min, max, required;
         let colNum = i+1;
@@ -180,7 +182,7 @@ function initForm() {
         let origStyles = origCell.getAttribute("style");
         let cell = document.createElement("td");
         cell.setAttribute("style", origStyles);
-        let value = origCell.textContent;
+        let value = rowData[name];
         if (type == "text") {
             el = document.createElement("input");
             el.value = value;
@@ -246,7 +248,7 @@ function initForm() {
             el.setAttribute("stadium-form-name", name);
             el.classList.add("form-control");
         }
-        if (!type && origCell.querySelector(":not(button, a, [type='checkbox'])")) { 
+        if (!type && origCell.querySelector(":not(button, a, [type='checkbox'])") && name != "RowSelector") { 
             cell.textContent = value;
             el = document.createElement("input");
             el.value = value;
@@ -291,11 +293,17 @@ async function saveButtonClick(e) {
         let formField = cells[i].querySelector("[stadium-form-name]:not([stadium-form-name='']");
         if (formField) {
             let fieldValue = formField.value;
+            if (isNumber(fieldValue)) {
+                fieldValue = parseFloat(fieldValue);
+            }
             if (formField.getAttribute("type") == "checkbox") fieldValue = formField.checked;
             if (dataGridColumns[i] != "RowSelector") callbackData[dataGridColumns[i]] = fieldValue;
             if (formField.tagName == "SELECT") fieldValue = formField.options[formField.selectedIndex].text;
             objData[dataGridColumns[i]] = fieldValue;
         } else if (IDColumn-1 == i){
+            if (isNumber(IDVal)) {
+                IDVal = parseFloat(IDVal);
+            }
             callbackData[dataGridColumns[i]] = IDVal;
             objData[dataGridColumns[i]] = IDVal;
         }
@@ -343,6 +351,10 @@ function getColumnDefinition(){
         cols.push(colDefs[i].name);
     }
     return cols;
+}
+function isNumber(value) {
+    if (isNaN(value)) value = value.replace(/ /g,"");
+    return !isNaN(value);
 }
 ```
 
