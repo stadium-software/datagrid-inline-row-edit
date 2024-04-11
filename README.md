@@ -227,7 +227,6 @@ function initForm() {
             el = document.createElement("select");
             for (let j = 0; j < data.length; j++) {
                 let option = document.createElement("option");
-                console.log(data[j]);
                 if (typeof data[j].text != "undefined" && typeof data[j].value != "undefined") {
                     option.text = data[j].text;
                     option.value = data[j].value;
