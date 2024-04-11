@@ -22,23 +22,7 @@ https://github.com/stadium-software/datagrid-inline-row-edit/assets/2085324/8813
   - [CSS Upgrading](#css-upgrading)
 
 ## Version 
-Current version 2.0 - changes are required!
-
-1.1 Row Editing
-
-1. Added code to skip rules that do not have corresponding columns
-2. Bug fix: Empty column headings caused save button to appear in the wrong column
-3. Added code to detect uniqueness of DataGrid class on page
-
-1.2 Updated script to cater for changed DataGrid rendering
-
-1.3 Added custom event handler feature
-
-1.4 Fixed Selectable column bug
-
-1.5 Enabled adding IDColumn and EditColumn as column numbers
-
-1.6 Fixed row not found error
+Current version 2.1 - changes are required!
 
 2.0 Added checkbox column support; changed header-based column definition to column count instead; added text and value definition for dropdowns. Required changes
 1. FormField Type: change "name" property to "column" (see [Type Setup](#type-setup))
@@ -51,7 +35,22 @@ Current version 2.0 - changes are required!
    2. Change FormFields list inputs for "dropdown" from list of strings to list of objects (see [example below](#editclick-event-setup))
    3. Amend values for script input parameters IDColumn & LinkColumn from strings to integers
 
-2.1 Added support for DataGrid searching and sorting
+2.1 Added support for DataGrid searching and sorting; added support for passing column names in the "columns" parameter (optional). Required changes
+1. Callback script: The result is no longer passed back to the callback script as an array, but as an object consisting of the columns in the DataGrid. Example:
+```json
+{
+    "ID":"1",
+    "FirstName":"Martina",
+    "LastName":"Vaughn",
+    "NoOfChildren":"10",
+    "NoOfPets":"9",
+    "StartDate":"2023-10-01",
+    "EndDate":"2023-10-02",
+    "Healthy":true,
+    "Happy":false,
+    "Subscription":"1"
+}
+```
 
 # Setup
 
@@ -109,6 +108,12 @@ let rowFormFields = ~.Parameters.Input.FormFields;
 let IDColumn = ~.Parameters.Input.IdentityColumn;
 let IDValue = ~.Parameters.Input.IdentityValue;
 let EditLink = ~.Parameters.Input.LinkColumn;
+if (isNaN(parseFloat(IDColumn))) {
+    IDColumn = getElementIndex(dataGridColumns, IDColumn) + 1;
+}
+if (isNaN(parseFloat(EditLink))) {
+    EditLink = getElementIndex(dataGridColumns, EditLink) + 1;
+}
 let rowNumber;
 let options = {
     childList: true,
@@ -157,12 +162,12 @@ function initForm() {
     editform.classList.add("edit-form");
     editform.setAttribute("data-id",IDValue);
     for (let i = 0; i < cells.length; i++) {
-        let colNum = i+1, el, ffield = getElement(rowFormFields, colNum, "column"), name, type, data, min, max, required;
-        let header = table.querySelector("thead th:nth-child(" + colNum + ")");
-        if (header) {
-            name = header.textContent;
-        } else {
-            name = "";
+        let el, type, data, min, max, required;
+        let colNum = i+1;
+        let ffield = getElementFromObjects(rowFormFields, colNum, "column");
+        let name = dataGridColumns[i];
+        if (!ffield) {
+            ffield = getElementFromObjects(rowFormFields, name, "column");
         }
         if (ffield) {
             type = ffield.type;
@@ -222,9 +227,19 @@ function initForm() {
             el = document.createElement("select");
             for (let j = 0; j < data.length; j++) {
                 let option = document.createElement("option");
-                option.text = data[j].text;
-                option.value = data[j].value;
-                if (data[j].text == value) {
+                console.log(data[j]);
+                if (typeof data[j].text != "undefined" && typeof data[j].value != "undefined") {
+                    option.text = data[j].text;
+                    option.value = data[j].value;
+                } else if (typeof data[j] == "object") {
+                    let ob = Object.entries(data[j]);
+                    option.text = ob[0][0];
+                    option.value = ob[0][1];
+                } else {
+                    option.text = data[j];
+                    option.value = data[j];
+                }
+                if (option.text == value) {
                     option.selected = true;
                 }
                 el.appendChild(option);
@@ -271,7 +286,7 @@ async function saveButtonClick(e) {
     let row = table.querySelector(".edit-form");
     let IDVal = row.getAttribute("data-id");
     let cells = row.cells;
-    let arrData = [];
+    let callbackData = {};
     let field, objData = {};
     for (let i = 0; i < cells.length; i++) {
         let formField = cells[i].querySelector("[stadium-form-name]:not([stadium-form-name='']");
@@ -279,17 +294,17 @@ async function saveButtonClick(e) {
             let fieldValue = formField.value;
             if (formField.getAttribute("type") == "checkbox") fieldValue = formField.checked;
             field = { Name: dataGridColumns[i], Value: fieldValue};
-            arrData.push(field);
+            if (dataGridColumns[i] != "RowSelector") callbackData[dataGridColumns[i]] = fieldValue;
             if (formField.tagName == "SELECT") fieldValue = formField.options[formField.selectedIndex].text;
             objData[dataGridColumns[i]] = fieldValue;
         } else if (IDColumn-1 == i){
             field = { Name: dataGridColumns[i], Value: IDVal};
-            arrData.push(field);
+            callbackData[dataGridColumns[i]] = IDVal;
             objData[dataGridColumns[i]] = IDVal;
         }
     }
     updateDataModelRow(IDVal, objData);
-    await scope[callback](arrData);
+    await scope[callback](callbackData);
     resetDataGrid();
 }
 function insertForm() { 
@@ -311,7 +326,10 @@ function insertForm() {
 function insertAfter(newNode, existingNode) {
     existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
-function getElement(haystack, needle, column) {
+function getElementIndex(haystack, needle) {
+    return haystack.indexOf(needle);
+}
+function getElementFromObjects(haystack, needle, column) {
     return haystack.find(obj => {return obj[column] == needle;});
 }
 function updateDataModelRow(id, rowData){
@@ -337,6 +355,7 @@ function getColumnDefinition(){
    1. RowData
 3. Drag a *Notification* action into the script
 4. In the *Message* property, select the *RowData* parameter from the *Script Input Parameters* category
+5. The Notification will display the updated row data as it is passed back to the "SaveRow" script
 
 ## Page Setup
 1. Drag a *DataGrid* control to the page ([see above](#database-connector-and-datagrid))
@@ -348,12 +367,13 @@ function getColumnDefinition(){
 
 ## Edit.Click Event Setup
 
-DataGrid must contain an Edit column (a clickable row-level coilumn) and that column must have a click event handler
+NOTE: The DataGrid must contain an Edit column (a clickable row-level column) and that column must have a click event handler (!)
 
 1. Drag a *List* action into the event script and name the List "FormFields"
 2. Set the List *Item Type* property to "Types.FormField"
 3. Define the editable columns of your datagrid and their form fields
-   1. column: The column number (start counting at 1; include all datagrid columns)
+   1. column: The column number (start counting at 1; include all datagrid columns) OR the column property name as it appears in the list of columns and the column "Name" property
+![ColumnPropertyName](images/ColumnPropertyName.png)
    2. type: The type of the column. Supported are
       1. text
       2. date
@@ -370,7 +390,7 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
  "column":3,
  "type": "text"
 },{
- "column": 4,
+ "column": "LastName",
  "type": "text"
 },{
  "column": 5,
@@ -385,7 +405,7 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
  "max": "10",
  "required": "true"
 },{
- "column": 7,
+ "column": "StartDate",
  "type": "date",
  "min": "01-01-2010",
  "max": "01-01-2024"
@@ -409,9 +429,9 @@ DataGrid must contain an Edit column (a clickable row-level coilumn) and that co
 4. Drag the Global Script called "EditableRow" into the event script
 5. Complete the Input properties for the script
    1. DataGridClass: The unique classname you assigned to the *DataGrid*
-   2. LinkColumn: The column number (e.g. 1)
+   2. LinkColumn: The column number (e.g. 1)  OR the column property name as it appears in the list of columns and the column "Name" property
    3. FormFields: Select the *List* called "FormFields" from the dropdown
-   4. IdentityColumn: The column number  (e.g. 2)
+   4. IdentityColumn: The column number  (e.g. 2) OR the column property name as it appears in the list of columns and the column "Name" property
    5. IdentityValue: The value from the IdentityColumn that uniquely identifies the row
    6. CallbackScript: The name of the page-level script that will process the updated data (e.g. SaveRow)
 
