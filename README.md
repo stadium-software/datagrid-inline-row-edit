@@ -286,18 +286,16 @@ async function saveButtonClick(e) {
     let IDVal = row.getAttribute("data-id");
     let cells = row.cells;
     let callbackData = {};
-    let field, objData = {};
+    let objData = {};
     for (let i = 0; i < cells.length; i++) {
         let formField = cells[i].querySelector("[stadium-form-name]:not([stadium-form-name='']");
         if (formField) {
             let fieldValue = formField.value;
             if (formField.getAttribute("type") == "checkbox") fieldValue = formField.checked;
-            field = { Name: dataGridColumns[i], Value: fieldValue};
             if (dataGridColumns[i] != "RowSelector") callbackData[dataGridColumns[i]] = fieldValue;
             if (formField.tagName == "SELECT") fieldValue = formField.options[formField.selectedIndex].text;
             objData[dataGridColumns[i]] = fieldValue;
         } else if (IDColumn-1 == i){
-            field = { Name: dataGridColumns[i], Value: IDVal};
             callbackData[dataGridColumns[i]] = IDVal;
             objData[dataGridColumns[i]] = IDVal;
         }
