@@ -27,13 +27,11 @@ Current version 2.1 - changes are required!
 2.0 Added checkbox column support; changed header-based column definition to column count instead; added text and value definition for dropdowns. Required changes
 1. FormField Type: change "name" property to "column" (see [Type Setup](#type-setup))
 2. Script (see [Global Script Setup](#global-script-setup))
-   1. Update to version below
+   1. Update script to version below
    2. Change input parameter name "EditColumnHeader" to "LinkColumn"
    3. Change input parameter name "IdentityColumnHeader" to "IdentityColumn"
 3. Event handler (see [Edit.Click Event Script](#editclick-event-setup))
-   1. Change FormFields list inputs for "column" (previously "name") from strings to integers
-   2. Change FormFields list inputs for "dropdown" from list of strings to list of objects (see [example below](#editclick-event-setup))
-   3. Amend values for script input parameters IDColumn & LinkColumn from strings to integers
+   1. Added support for dropdown text and value definition (see [example below](#editclick-event-setup))
 
 2.1 Added support for DataGrid searching and sorting; added support for passing column names in the "columns" parameter (optional). Required changes
 1. Callback script: The result is no longer passed back to the callback script as an array, but as an object consisting of the columns in the DataGrid. Example:
