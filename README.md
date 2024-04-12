@@ -246,7 +246,7 @@ function initForm() {
             el.setAttribute("stadium-form-name", name);
             el.classList.add("form-control");
         }
-        if (!type && origCell.querySelector(":not(button, a, [type='checkbox'])") && name != "RowSelector") { 
+        if (!type && !origCell.querySelector(":is(button, a, [type='checkbox'])") && name != "RowSelector") { 
             cell.textContent = value;
             el = document.createElement("input");
             el.value = value;
