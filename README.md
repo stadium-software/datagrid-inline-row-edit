@@ -140,9 +140,10 @@ observer.observe(dg, options);
 
 function initForm() { 
     let IDCells = table.querySelectorAll("tbody tr td:nth-child(" + IDColumn + ")");
+    table.querySelector("thead").addEventListener("click", resetDataGrid);
     for (let i = 0; i < IDCells.length; i++) {
         let rowtr = IDCells[i].parentElement;
-        let IDCell = IDCells[i].innerText.replaceAll(" ", "");
+        let IDCell = convertToNumber(IDCells[i].textContent);
         if (IDCell == IDValue) {
             rowNumber = i+1;
         } else { 
@@ -212,8 +213,10 @@ function initForm() {
                 el.setAttribute("max", max);
             }
             el.setAttribute("stadium-form-name", name);
-            let d = new Date(value);
-            el.value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            if (value) {
+                let d = new Date(value);
+                el.value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            }
         }
         if (type == "checkbox") {
             el = document.createElement("input");
@@ -290,22 +293,18 @@ async function saveButtonClick(e) {
     for (let i = 0; i < cells.length; i++) {
         let formField = cells[i].querySelector("[stadium-form-name]:not([stadium-form-name='']");
         if (formField) {
-            let fieldValue = formField.value;
-            if (isNumber(fieldValue)) {
-                fieldValue = parseFloat(fieldValue);
-            }
+            let fieldValue = convertToNumber(formField.value);
             if (formField.getAttribute("type") == "checkbox") fieldValue = formField.checked;
             if (dataGridColumns[i] != "RowSelector") callbackData[dataGridColumns[i]] = fieldValue;
             if (formField.tagName == "SELECT") fieldValue = formField.options[formField.selectedIndex].text;
             objData[dataGridColumns[i]] = fieldValue;
         } else if (IDColumn-1 == i){
-            if (isNumber(IDVal)) {
-                IDVal = parseFloat(IDVal);
-            }
+            IDVal = convertToNumber(IDVal);
             callbackData[dataGridColumns[i]] = IDVal;
             objData[dataGridColumns[i]] = IDVal;
         }
     }
+    table.querySelector("thead").removeEventListener("click", resetDataGrid);
     updateDataModelRow(IDVal, objData);
     await scope[callback](callbackData);
     resetDataGrid();
@@ -350,10 +349,17 @@ function getColumnDefinition(){
     }
     return cols;
 }
-function isNumber(value) {
-    if (value == '') return false;
-    if (isNaN(value)) value = value.replace(/ /g,"");
-    return !isNaN(value);
+function isNumber(str) {
+    if (typeof str == "number") return true;
+    return !isNaN(str) && !isNaN(parseFloat(str));
+}
+function convertToNumber(val) {
+    if (!isNumber(val)) {
+        let no;
+        if (typeof val == "string") no = val.replace(/ /g,"");
+        if (isNumber(no)) return no;
+    }
+    return val;
 }
 ```
 
