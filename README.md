@@ -22,7 +22,7 @@ https://github.com/stadium-software/datagrid-inline-row-edit/assets/2085324/cc81
   - [CSS Upgrading](#css-upgrading)
 
 ## Version 
-Current version 2.1 - changes are required!
+Current version 2.2
 
 2.0 Added checkbox column support; changed header-based column definition to column count instead; added text and value definition for dropdowns. Required changes
 1. FormField Type: change "name" property to "column" (see [Type Setup](#type-setup))
@@ -49,6 +49,8 @@ Current version 2.1 - changes are required!
     "Subscription":"1"
 }
 ```
+
+2.2 Some minor bug fixes
 
 # Setup
 
@@ -84,7 +86,7 @@ Current version 2.1 - changes are required!
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/* Stadium Script Version 2.1 https://github.com/stadium-software/datagrid-inline-row-edit */
+/* Stadium Script Version 2.2 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
 let arrPageName = window.location.pathname.split("/");
@@ -115,6 +117,12 @@ if (!isNumber(EditLink)) {
 }
 let idColumnName = dataGridColumns[IDColumn - 1];
 let rowNumber;
+let options = {
+    childList: true,
+    subtree: true,
+    characterData: true,
+};
+let observer = new MutationObserver(resetDataGrid);
 
 initForm();
 document.onkeydown = function (evt) {
@@ -134,9 +142,6 @@ document.onkeydown = function (evt) {
 
 function initForm() { 
     let IDCells = table.querySelectorAll("tbody tr td:nth-child(" + IDColumn + ")");
-    table.querySelector("thead").addEventListener("click", resetDataGrid);
-    table.querySelector("tfoot").addEventListener("click", resetDataGrid);
-    dg.querySelector(".data-grid-header").addEventListener("click", resetDataGrid);
     for (let i = 0; i < IDCells.length; i++) {
         let rowtr = IDCells[i].parentElement;
         let IDCell = convertToNumber(IDCells[i].textContent);
@@ -270,15 +275,14 @@ function initForm() {
         editform.appendChild(cell);
     }
     insertAfter(editform, row);
+    observer.observe(table, options);
 }
 function resetDataGrid(){ 
+    observer.disconnect();
     let editorig = table.querySelector(".edit-orig");
     if (editorig) editorig.classList.remove("edit-orig");
     let editform = table.querySelector(".edit-form");
     if (editform) editform.remove();
-    table.querySelector("thead").removeEventListener("click", resetDataGrid);
-    table.querySelector("tfoot").removeEventListener("click", resetDataGrid);
-    dg.querySelector(".data-grid-header").removeEventListener("click", resetDataGrid);
     let trs = table.querySelectorAll("tr");
     for (let i = 0; i < trs.length; i++) {
         trs[i].classList.remove("opacity");
@@ -311,7 +315,6 @@ async function saveButtonClick() {
         }
     }
     if (isValid) {
-        table.querySelector("thead").removeEventListener("click", resetDataGrid);
         updateDataModelRow(IDVal, objData);
         await scope[callback](callbackData);
         resetDataGrid();
@@ -326,13 +329,13 @@ function getElementIndex(haystack, needle) {
 function getElementFromObjects(haystack, needle, column) {
     return haystack.find(obj => {return obj[column] == needle;});
 }
-function updateDataModelRow(id, rowData){
+function updateDataModelRow(id, rowData) {
     let handler1 = {};
     let dgData = scope[`${datagridname}Data`];
     let result = dgData.map(el => el[dataGridColumns[IDColumn-1]] == id ? new Proxy(rowData, handler1) : el);
     scope[`${datagridname}Data`] = result;
 }
-function getColumnDefinition(){
+function getColumnDefinition() {
     let cols = [];
     let colDefs = scope[`${datagridname}ColumnDefinitions`];
     if (table.querySelector("thead th:nth-child(1) input[type=checkbox")) cols.push("RowSelector");
@@ -349,7 +352,9 @@ function convertToNumber(val) {
     if (!isNumber(val)) {
         let no;
         if (typeof val == "string") no = val.replace(/ /g,"");
-        if (isNumber(no)) return no;
+        if (isNumber(no)) return Number(no);
+    } else {
+        val = Number(val);
     }
     return val;
 }
