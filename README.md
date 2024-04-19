@@ -13,16 +13,17 @@ https://github.com/stadium-software/datagrid-inline-row-edit/assets/2085324/cc81
   - [Database, Connector and DataGrid](#database-connector-and-datagrid)
   - [Type Setup](#type-setup)
   - [Global Script Setup](#global-script-setup)
-  - [Page-Script Setup](#page-script-setup)
   - [Page Setup](#page-setup)
   - [Page.Load Event Setup](#pageload-event-setup)
   - [Edit.Click Event Setup](#editclick-event-setup)
+  - [Callback Script Setup](#callback-script-setup)
+    - [Callback Script Success Boolean](#callback-script-success-boolean)
   - [Applying the CSS](#applying-the-css)
   - [Customising CSS](#customising-css)
   - [CSS Upgrading](#css-upgrading)
 
 ## Version 
-Current version 2.2
+Current version 2.3
 
 2.0 Added checkbox column support; changed header-based column definition to column count instead; added text and value definition for dropdowns. Required changes
 1. FormField Type: change "name" property to "column" (see [Type Setup](#type-setup))
@@ -34,23 +35,11 @@ Current version 2.2
    1. Added support for dropdown text and value definition (see [example below](#editclick-event-setup))
 
 2.1 Added support for DataGrid searching and sorting; added support for passing column names in the "columns" parameter (optional). Required changes
-1. Callback script: The result is no longer passed back to the callback script as an array, but as an object consisting of the columns in the DataGrid. Example:
-```json
-{
-    "ID":"1",
-    "FirstName":"Martina",
-    "LastName":"Vaughn",
-    "NoOfChildren":"10",
-    "NoOfPets":"9",
-    "StartDate":"2023-10-01",
-    "EndDate":"2023-10-02",
-    "Healthy":true,
-    "Happy":false,
-    "Subscription":"1"
-}
-```
+1. Callback script: The result is no longer passed back to the callback script as an array, but as an [object consisting of the columns in the DataGrid](#callback-script-setup).
 
 2.2 Some minor bug fixes
+
+2.3 Added more datagrid areas to invoke click-away form dismiss; added optional [return boolean for callback script](#optional-setting-up-a-return-boolean-from-the-callback-script)
 
 # Setup
 
@@ -86,7 +75,7 @@ Current version 2.2
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/* Stadium Script Version 2.2 https://github.com/stadium-software/datagrid-inline-row-edit */
+/* Stadium Script Version 2.3 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
 let arrPageName = window.location.pathname.split("/");
@@ -142,6 +131,9 @@ document.onkeydown = function (evt) {
 
 function initForm() { 
     let IDCells = table.querySelectorAll("tbody tr td:nth-child(" + IDColumn + ")");
+    table.querySelector("thead").addEventListener("click", resetDataGrid);
+    table.querySelector("tfoot").addEventListener("click", resetDataGrid);
+    dg.querySelector(".data-grid-header").addEventListener("click", resetDataGrid);
     for (let i = 0; i < IDCells.length; i++) {
         let rowtr = IDCells[i].parentElement;
         let IDCell = convertToNumber(IDCells[i].textContent);
@@ -288,6 +280,9 @@ function resetDataGrid(){
         trs[i].classList.remove("opacity");
         trs[i].removeEventListener("click", resetDataGrid);
     }
+    table.querySelector("thead").removeEventListener("click", resetDataGrid);
+    table.querySelector("tfoot").removeEventListener("click", resetDataGrid);
+    dg.querySelector(".data-grid-header").removeEventListener("click", resetDataGrid);
 }
 async function saveButtonClick() { 
     let isValid = true;
@@ -315,9 +310,11 @@ async function saveButtonClick() {
         }
     }
     if (isValid) {
-        updateDataModelRow(IDVal, objData);
-        await scope[callback](callbackData);
-        resetDataGrid();
+        let returned = await scope[callback](callbackData);
+        if (typeof returned !== "undefined" && returned.success !== false || (typeof returned === "undefined")) {
+            updateDataModelRow(IDVal, objData);
+            resetDataGrid();
+        }
     }
 }
 function insertAfter(newNode, existingNode) {
@@ -359,14 +356,6 @@ function convertToNumber(val) {
     return val;
 }
 ```
-
-## Page-Script Setup
-1. Create a Script inside of the Page with any name you like (e.g. "SaveRow")
-2. Add one input parameter to the Script
-   1. RowData
-3. Drag a *Notification* action into the script
-4. In the *Message* property, select the *RowData* parameter from the *Script Input Parameters* category
-5. The Notification will display the updated row data as it is passed back to the "SaveRow" script
 
 ## Page Setup
 1. Drag a *DataGrid* control to the page ([see above](#database-connector-and-datagrid))
@@ -447,6 +436,36 @@ NOTE: The DataGrid must contain an Edit column (a clickable row-level column) an
    6. CallbackScript: The name of the page-level script that will process the updated data (e.g. SaveRow)
 
 ![Inline Editing Input Parameters](images/InlineRowEditingInputParameters.png)
+
+## Callback Script Setup
+1. Create a Script inside of the Page with any name you like (e.g. "SaveRow")
+2. Add one input parameter to the Script
+   1. RowData
+3. Drag a *Notification* action into the script
+4. In the *Message* property, select the *RowData* parameter from the *Script Input Parameters* category
+5. The Notification will display the updated row data as it is passed back to the "SaveRow" script. Example:
+```json
+{
+    "ID":"1",
+    "FirstName":"Martina",
+    "LastName":"Vaughn",
+    "NoOfChildren":"10",
+    "NoOfPets":"9",
+    "StartDate":"2023-10-01",
+    "EndDate":"2023-10-02",
+    "Healthy":true,
+    "Happy":false,
+    "Subscription":"1"
+}
+```
+
+### Callback Script Success Boolean
+Returning an output parameter called "success" with the value of "false" from the callback script will result cause the form to remain in the DataGrid. This allows for the implementation of custom data validation functions in the callback script. 
+1. Add an *Output Parameter* to the callback script called "success"
+2. Use a *SetValue* action in the callback script to set the "success" output parameter to "false" to prevent the form from being removed from the DataGrid
+3. In all other cases, the form will be removed from the DataGrid
+
+![](images/Callback-Output.png)
 
 ## Applying the CSS
 The CSS below is required for the correct functioning of the module. Some elements can be [customised](#customising-css) using a variables CSS file. 
