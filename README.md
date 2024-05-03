@@ -41,6 +41,8 @@ Current version 2.3
 
 2.3 Added more datagrid areas to invoke click-away form dismiss; added optional [return boolean for callback script](#optional-setting-up-a-return-boolean-from-the-callback-script)
 
+2.4 Fixed "control in template" bug; enhanced "FormField" data list type
+
 # Setup
 
 ## Application Setup
@@ -59,7 +61,9 @@ Current version 2.3
    4. "min" (Any)
    5. "max" (Any)
    6. "data" (List)
-      1. "Item" (Any)
+      1. "Item" (Object)
+         1. "text" (Any)
+         2. "value" (Any)
 
 ![Form Fields](images/FormFieldType.png)
 
@@ -75,15 +79,19 @@ Current version 2.3
 3. Drag a *JavaScript* action into the script
 4. Add the Javascript below into the JavaScript code property
 ```javascript
-/* Stadium Script Version 2.3 https://github.com/stadium-software/datagrid-inline-row-edit */
+/* Stadium Script Version 2.4 https://github.com/stadium-software/datagrid-inline-row-edit */
 let scope = this;
 let callback = ~.Parameters.Input.CallbackScript;
-let arrPageName = window.location.pathname.split("/");
-let pageName = arrPageName[arrPageName.length - 1];
-let dgClassName = "." + ~.Parameters.Input.DataGridClass;
+let classInput = ~.Parameters.Input.DataGridClass;
+if (typeof classInput == "undefined") {
+    console.error("The DataGridClass parameter is required");
+    return false;
+} 
+let dgClassName = "." + classInput;
 let dg = document.querySelectorAll(dgClassName);
 if (dg.length == 0) {
-    dg = document.querySelector(".data-grid-container");
+    console.error("The class '" + dgClassName + "' is not assigned to any DataGrid");
+    return false;
 } else if (dg.length > 1) {
     console.error("The class '" + dgClassName + "' is assigned to multiple DataGrids. DataGrids using this script must have unique classnames");
     return false;
@@ -91,7 +99,7 @@ if (dg.length == 0) {
     dg = dg[0];
 }
 dg.classList.add("stadium-inline-edit-datagrid", "datagrid-inline-edit-form");
-let datagridname = dg.id.replace(`${pageName}_`, "").replace("-container","");
+let datagridname = dg.id.split("_")[1].replace("-container","");
 let table = dg.querySelector("table");
 let dataGridColumns = getColumnDefinition();
 let rowFormFields = ~.Parameters.Input.FormFields;
