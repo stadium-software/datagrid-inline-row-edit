@@ -23,7 +23,7 @@ https://github.com/stadium-software/datagrid-inline-row-edit/assets/2085324/cc81
   - [CSS Upgrading](#css-upgrading)
 
 ## Version 
-Current version 2.3
+Current version 2.4
 
 2.0 Added checkbox column support; changed header-based column definition to column count instead; added text and value definition for dropdowns. Required changes
 1. FormField Type: change "name" property to "column" (see [Type Setup](#type-setup))
