@@ -69,7 +69,7 @@ Current version 2.4
 
 ## Global Script Setup
 1. Create a Global Script called "EditableRow"
-2. Add five input parameters to the Global Script
+2. Add the input parameters below to the Global Script
    1. DataGridClass
    2. LinkColumn
    3. FormFields
@@ -367,7 +367,7 @@ function convertToNumber(val) {
 
 ## Page Setup
 1. Drag a *DataGrid* control to the page ([see above](#database-connector-and-datagrid))
-2. Add a class of your choosing to the *DataGrid* *Classes* property ti uniquely identify this DataGrid on this page (e.g datagrid-inline-edit)
+2. Add a class of your choosing to the *DataGrid* *Classes* property thato uniquely identifies the DataGrid on this page (e.g datagrid-inline-edit)
 3. Note: If multiple editable DataGrids are shown on one page, each DataGrid must have a unique classname
 
 ## Page.Load Event Setup
@@ -392,7 +392,7 @@ NOTE: The DataGrid must contain an Edit column (a clickable row-level column) an
    3. required: A boolean (add "true" if required)
    4. min: A minimum value for number or date columns
    5. max: A maximum value for number or date columns
-   6. data: A simple list of values for dropdowns (see example below)
+   6. data: A list of text & value objects for dropdowns (see example below)
 ```json
 = [{
  "column":3,
@@ -446,24 +446,23 @@ NOTE: The DataGrid must contain an Edit column (a clickable row-level column) an
 ![Inline Editing Input Parameters](images/InlineRowEditingInputParameters.png)
 
 ## Callback Script Setup
-1. Create a Script inside of the Page with any name you like (e.g. "SaveRow")
-2. Add one input parameter to the Script
-   1. RowData
+1. Add a script under the Page (e.g. "SaveRow")
+2. Add an input parameter to the script (e.g. "RowData")
 3. Drag a *Notification* action into the script
-4. In the *Message* property, select the *RowData* parameter from the *Script Input Parameters* category
+4. In the *Notification* *Message* property, select the *RowData* parameter from the *Script Input Parameters* category
 5. The Notification will display the updated row data as it is passed back to the "SaveRow" script. Example:
 ```json
 {
     "ID":"1",
     "FirstName":"Martina",
     "LastName":"Vaughn",
-    "NoOfChildren":"10",
-    "NoOfPets":"9",
+    "NoOfChildren":10,
+    "NoOfPets":9,
     "StartDate":"2023-10-01",
     "EndDate":"2023-10-02",
     "Healthy":true,
     "Happy":false,
-    "Subscription":"1"
+    "Subscription":1
 }
 ```
 
