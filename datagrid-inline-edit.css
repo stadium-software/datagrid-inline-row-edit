@@ -1,5 +1,8 @@
-/* CSS version 2.0 https: //github.com/stadium-software/datagrid-inline-row-edit */
+/* CSS version 2.1 https: //github.com/stadium-software/datagrid-inline-edit */
 .datagrid-inline-edit-form {
+	:has(#table-clone) :is(.data-grid-header, tfoot) {
+		display: none;
+	}
 	& .visually-hidden {
 		height: 0;
 		width: 0;
@@ -16,46 +19,46 @@
 		align-items: center;
 	}
 	& table .form-control {
-		width: var(--datagrid-inline-edit-text-field-size);
+		width: var(--datagrid-inline-edit-text-field-size, auto);
 	}
 	& table select.form-control {
-		width: var(--datagrid-inline-edit-dropdown-field-size);
+		width: var(--datagrid-inline-edit-dropdown-field-size, auto);
 	}
 	& table input[type="date"].form-control {
-		width: var(--datagrid-inline-edit-date-field-size);
+		width: var(--datagrid-inline-edit-date-field-size, auto);
 	}
 	& table input[type="number"].form-control {
-		width: var(--datagrid-inline-edit-number-field-size);
+		width: var(--datagrid-inline-edit-number-field-size, 80px);
 	}
 	& .table-striped > tbody > tr.editing:nth-of-type(odd),
 	& .table-striped>tbody>tr.editing:nth-of-type(even) {
-		background-color: var(--datagrid-inline-edit-active-row-background-color);
+		background-color: var(--datagrid-inline-edit-active-row-background-color, var(--CONTRAST-THEME-COLOR));
 		& td {
-			border-top: 1px solid var(--datagrid-inline-edit-active-row-border-top-color);
-			border-bottom: 1px solid var(--datagrid-inline-edit-active-row-border-bottom-color);
+			border-top: 1px solid var(--datagrid-inline-edit-active-row-border-top-color, var(--MAIN-THEME-COLOR));
+			border-bottom: 1px solid var(--datagrid-inline-edit-active-row-border-bottom-color, var(--MAIN-THEME-COLOR));
 		}
 		& .last-visible-column {
-			border-right: 1px solid var(--datagrid-inline-edit-active-row-border-right-color);
+			border-right: 1px solid var(--datagrid-inline-edit-active-row-border-right-color, var(--MAIN-THEME-COLOR));
 		}
 		& td:first-child {
-			border-left: 1px solid var(--datagrid-inline-edit-active-row-border-left-color);
+			border-left: 1px solid var(--datagrid-inline-edit-active-row-border-left-color, var(--MAIN-THEME-COLOR));
 		}
 	}
 	& .inline-edit-hide {
 		display: none;
 	}
 	& .stadium-form-save {
-		font-size: var(--row-inline-edit-button-font-size);
-		background-color: var(--row-inline-edit-button-background-color);
-		border: 1px solid var(--row-inline-edit-button-border-color);
-		padding: var(--row-inline-edit-button-topbottom-padding) var(--row-inline-edit-button-rightleft-padding);
-		color: var(--row-inline-edit-button-font-color);
+		font-size: var(--row-inline-edit-button-font-size, var(--FORM-CONTROL-FONT-SIZE));
+		background-color: var(--row-inline-edit-button-background-color, var(--SECONDARY-THEME-COLOR));
+		border: 1px solid var(--row-inline-edit-button-border-color, var(--SECONDARY-THEME-COLOR));
+		padding: var(--row-inline-edit-button-topbottom-padding, 6px) var(--row-inline-edit-button-rightleft-padding, 6px);
+		color: var(--row-inline-edit-button-font-color, var(--CONTRAST-THEME-COLOR));
 	}
 	& .opacity {
-		opacity: var(--row-inline-edit-disabled-rows-opacity);
+		opacity: var(--row-inline-edit-disabled-rows-opacity, .6);
 	}
 	& .data-grid-container .table-striped>tbody>tr.edit-form {
-		background-color: var(--row-inline-edit-row-background-color);
+		background-color: var(--row-inline-edit-row-background-color, var(--SECONDARY-THEME-COLOR));
 	}
 	& .data-grid-container .table-striped.edit-orig-table {
 		display: none;
@@ -70,7 +73,7 @@
 		padding: 0;
 	}
 }
-button.btn.visually-hidden {
+#app button.btn.btn-default.visually-hidden {
 	height: 0;
 	width: 0;
 	overflow: hidden;
