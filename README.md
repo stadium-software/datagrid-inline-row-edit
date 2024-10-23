@@ -2,6 +2,10 @@
 
 Allowing users to conveniently and swiftly edit selected DataGrid rows
 
+**NOTE**
+
+Consider using a link column and a [popup](https://github.com/stadium-software/popups) rather than the inline edit mode. The popup method is more extensible and more rubust than the inline edit method. 
+
 https://github.com/stadium-software/datagrid-inline-row-edit/assets/2085324/cc817c53-c7b6-4f82-88a0-ce9abc5379ad
 
 # Content
